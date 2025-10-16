@@ -55,7 +55,8 @@
       font-weight: 700;
     }
 
-    .controls-wrap { border-bottom: 1px solid var(--border); background: linear-gradient(180deg, rgba(13,18,38,.9), rgba(13,18,38,.75)); position: sticky; top: 0; z-index: 20; }
+  /* Removed sticky positioning so controls don't stick to viewport */
+  .controls-wrap { border-bottom: 1px solid var(--border); background: linear-gradient(180deg, rgba(13,18,38,.9), rgba(13,18,38,.75)); position: static; }
   .controls { display: flex; gap: 10px; align-items: center; padding: 12px 16px; flex-wrap: nowrap; overflow-x: auto; }
   /* unify heights for controls */
   .controls input[type="date"], .controls select, .controls button, .controls .file-button { font-size: 1.05em; height: 44px; line-height: 1; padding: 8px 12px; }
@@ -111,7 +112,7 @@
     }
 
   .table-wrap { margin-top: 16px; }
-  .table-panel { padding: 12px; }
+  .table-panel { padding: 12px; overflow-x: auto; }
 
   /* Detail table: enable wrapping and auto-sizing */
   .detail-table { width: 100%; border-collapse: collapse; min-width: 360px; table-layout: auto; }
@@ -172,12 +173,33 @@
 
     .empty { color: var(--muted); text-align: center; padding: 36px; }
 
+    @media (max-width: 1200px) {
+      .detail-table th, .detail-table td { font-size: 1em; padding: 8px 10px; }
+      .app-title { font-size: 30px; }
+    }
     @media (max-width: 920px) {
-      .controls { grid-template-columns: repeat(6, 1fr); }
+      .controls { flex-wrap: wrap; gap: 8px; }
+      .controls .field { width: 100%; }
+      .controls input[type="date"], .controls select, .controls button, .controls .file-button { flex: 1 1 auto; min-width: 120px; }
+      #janmaRashi { width: auto; }
+      #refLang { width: auto; }
     }
     @media (max-width: 640px) {
-      .controls { grid-template-columns: repeat(2, 1fr); }
+      body { font-size: 1.05rem; }
+      .container { padding: 12px; }
+      .controls input[type="date"], .controls select, .controls button, .controls .file-button { min-width: 48%; }
+      #dateInput { flex: 1 1 48%; }
+      .controls { justify-content: flex-start; }
+      .pill { font-size: 16px; padding: 6px 10px; }
+      .detail-table th, .detail-table td { font-size: .95em; padding: 8px; }
+      .planet-ref { max-width: 60vw; }
       .hint { font-size: 11px; }
+    }
+    @media (max-width: 420px) {
+      body { font-size: .95rem; }
+      .controls input[type="date"], .controls select, .controls button, .controls .file-button { min-width: 100%; }
+      .toolbar { flex-wrap: wrap; gap: 8px; }
+      .toolbar .right { width: 100%; justify-content: space-between; }
     }
   </style>
 </head>
@@ -224,7 +246,7 @@
             <option value="telugu">TELUGU</option>
             <option value="kannada">KANNADA</option>
           </select>
-          <button id="chooseFileBtn" class="file-button" style="margin-left:12px;">UPLOAD</button>
+          <button id="chooseFileBtn" class="file-button" style="margin-left:12px;">Upload json</button>
           <input id="fileInput" type="file" accept="application/json" style="display:none;" />
           <div style="margin-left:auto; display:flex; align-items:center;">
           </div>
@@ -241,7 +263,7 @@
   <div class="container table-wrap">
       <div class="panel table-panel">
       <div class="toolbar">
-        <div><strong>Transit</strong></div>
+        <div><strong>Gochara Phala</strong></div>
         <div class="right">
           <span class="pill" id="activeDate">—</span>
           <div style="margin-left:8px; font-size:13px; color:var(--muted);">Status: <span id="statusMsg">Ready</span></div>
@@ -270,7 +292,6 @@
       raw: [],
       filtered: [],
       byKeyOptions: {},
-      sticky: {},
       loadedFrom: "auto",
       fieldsOrder: []
     };
