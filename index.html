@@ -1,0 +1,771 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Panchanga Transit</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #121a33;
+      --panel-2: #0f1730;
+      --text: #e8eefc;
+      --muted: #a9b5d1;
+      --brand: #6aa1ff;
+      --brand-2: #8bd2ff;
+      --accent: #ffd166;
+      --danger: #ff6b6b;
+      --ok: #3ddc97;
+      --border: #223059;
+      --shadow: 0 6px 18px rgba(0,0,0,.35);
+      --radius: 12px;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      background: radial-gradient(1200px 800px at 20% 0%, #101735 0%, var(--bg) 60%);
+      color: var(--text);
+      font-size: 1.5rem;
+    }
+    a { color: var(--brand-2); }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    .app-title {
+      font-size: 36px;
+      font-weight: 800;
+      letter-spacing: .4px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 8px 0 16px;
+    }
+    .app-title .badge {
+      font-size: 12px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+      color: #0b1020;
+      font-weight: 700;
+    }
+
+    .controls-wrap { border-bottom: 1px solid var(--border); background: linear-gradient(180deg, rgba(13,18,38,.9), rgba(13,18,38,.75)); position: sticky; top: 0; z-index: 20; }
+  .controls { display: flex; gap: 10px; align-items: center; padding: 12px 16px; flex-wrap: nowrap; overflow-x: auto; }
+  /* unify heights for controls */
+  .controls input[type="date"], .controls select, .controls button, .controls .file-button { font-size: 1.05em; height: 44px; line-height: 1; padding: 8px 12px; }
+  .controls .field { display: flex; align-items: center; }
+  /* prevent the global width:100% rule from forcing controls to stack; keep them auto-sized inside .controls */
+  .controls input[type="date"], .controls select, .controls button, .controls .file-button { width: auto !important; min-width: 90px; }
+  /* explicit sizes for important controls to keep single-line layout */
+  #dateInput { width: 150px; }
+  #stepSelect { width: 110px; }
+  #janmaRashi { width: 170px; }
+  #refLang { width: 130px; }
+    .panel {
+      background: linear-gradient(180deg, var(--panel), var(--panel-2));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    label { font-size: 18px; color: var(--muted); }
+    input[type="date"], select, button, input[type="file"] {
+      width: 100%;
+      background: #0e1530;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      outline: none;
+      transition: border .2s ease, box-shadow .2s ease;
+    }
+    input[type="date"]:focus, select:focus, button:focus, input[type="file"]:focus { border-color: var(--brand-2); box-shadow: 0 0 0 3px rgba(139,210,255,.15); }
+    button {
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+      color: #0b1020;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .4px;
+      cursor: pointer;
+    }
+    button.secondary { background: transparent; color: var(--text); border: 1px dashed var(--border); }
+    button:disabled { opacity: .6; cursor: not-allowed; }
+
+    .hint {
+      grid-column: 1 / -1;
+      color: var(--muted);
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+  .table-wrap { margin-top: 16px; }
+  .table-panel { padding: 12px; }
+
+  /* Detail table: enable wrapping and auto-sizing */
+  .detail-table { width: 100%; border-collapse: collapse; min-width: 360px; table-layout: auto; }
+  .detail-table th, .detail-table td { padding: 10px 12px; border: 1px solid var(--border); font-size: 1.05em; white-space: normal; overflow-wrap: anywhere; word-break: break-word; vertical-align: middle; text-align: center; }
+  .detail-table th { background: #c6a400; color: #0b1020; font-weight: 800; font-size: 1.1em; }
+  .detail-table .label { width: 220px; font-weight: 800; color: var(--text); background: rgba(255,255,255,.06); }
+  .detail-table .value { color: #dfe7fb; }
+  .detail-table .distance { width: 120px; text-align: center; color: #dfe7fb; }
+  .detail-table .result { width: 180px; text-align: center; }
+  .detail-table .reference { color: #e8eefc; }
+
+  /* Planet-specific columns: slightly narrower to avoid excessive width */
+  /* Make planet columns more compact; allow wrapping inside */
+  /* planet-name and planet-dist reduced by ~35% */
+  .detail-table .planet-name { width: 78px; max-width: 130px; overflow-wrap: anywhere; }
+  .detail-table .planet-dist { width: 46px; max-width: 58px; text-align: center; }
+  .detail-table .planet-res { width: 120px; max-width: 180px; text-align: center; }
+  .detail-table td.planet-veda { width: 80px; max-width: 120px; text-align: center; color: #dfe7fb; }
+  .detail-table td.planet-veda-effect { width: 140px; max-width: 200px; text-align: center; color: #dfe7fb; }
+  .detail-table .planet-veda-effect .tick { font-weight: 900; margin-left: 6px; }
+  .detail-table .planet-veda-effect .tick.red { color: #ff4d4d; }
+  .detail-table .planet-veda-effect .tick.green { color: #3ddc97; }
+  /* Global tick styles so ticks can be reused elsewhere (Phala column) */
+  .tick { font-weight: 900; margin-left: 6px; }
+  .tick.red { color: #ff4d4d; }
+  .tick.green { color: #3ddc97; }
+  /* Phala simple text (no rounded tag) */
+  .phala { background: none; border: none; border-radius: 0; font-weight: 800; padding: 0; }
+  .phala.ausp { color: #3ddc97; }
+  .phala.inausp { color: #ff8a8a; }
+  /* Reference column expanded as much as reasonable */
+  .detail-table .planet-ref { width: 520px; max-width: 1200px; overflow-wrap: anywhere; }
+
+  /* Expanded mode: loosen widths for easier readability */
+  .detail-table.expanded .planet-name { width: 320px; max-width: 520px; }
+  .detail-table.expanded .planet-dist { width: 90px; max-width: 140px; }
+  .detail-table.expanded .planet-res { width: 220px; max-width: 420px; }
+  .detail-table.expanded .planet-ref { width: 900px; max-width: 2000px; }
+    .tag { display:inline-block; padding: 6px 10px; border-radius: 999px; font-weight: 700; }
+    .tag.ausp { background: rgba(61,220,151,.15); color: #52e2ad; border: 1px solid rgba(61,220,151,.35); }
+    .tag.inausp { background: rgba(255,107,107,.15); color: #ff8a8a; border: 1px solid rgba(255,107,107,.35); }
+
+    .status {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 18px; color: var(--muted);
+    }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--brand-2); box-shadow: 0 0 0 6px rgba(139,210,255,.12); }
+
+    .toolbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 16px; border-bottom: 1px solid var(--border);
+    }
+    .toolbar .right { display: flex; align-items: center; gap: 8px; }
+    .pill {
+      background: #0e1530; border: 1px solid var(--border); color: var(--muted);
+      font-size: 18px; padding: 8px 14px; border-radius: 999px;
+    }
+
+    .empty { color: var(--muted); text-align: center; padding: 36px; }
+
+    @media (max-width: 920px) {
+      .controls { grid-template-columns: repeat(6, 1fr); }
+    }
+    @media (max-width: 640px) {
+      .controls { grid-template-columns: repeat(2, 1fr); }
+      .hint { font-size: 11px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="app-title">
+      <span>🗓️ Transit Navigator</span>
+      <span class="badge">BETA</span>
+    </div>
+  </div>
+
+  <div class="controls-wrap">
+    <div class="container">
+      <div class="panel">
+        <div class="controls">
+          <!-- Single inline controls row: Prev, Date, Next, Step, Janma, RefLang, Choose File -->
+          <button id="prevBtn" class="secondary">◀</button>
+          <input id="dateInput" type="date" aria-label="Date" style="margin:0 8px;" />
+          <button id="nextBtn" class="secondary">▶</button>
+          <select id="stepSelect" style="margin-left:8px;">
+            <option value="day">Day</option>
+            <option value="week">Week</option>
+            <option value="month">Month</option>
+            <option value="year">Year</option>
+          </select>
+          <select id="janmaRashi" style="margin-left:8px;">
+            <option value="">Select</option>
+            <option value="Mesha">Mesha</option>
+            <option value="Vrushaba">Vrushaba</option>
+            <option value="Mithuna">Mithuna</option>
+            <option value="Karka">Karka</option>
+            <option value="Simha">Simha</option>
+            <option value="Kanya">Kanya</option>
+            <option value="Tula">Tula</option>
+            <option value="Vrischika">Vrischika</option>
+            <option value="Dhanu">Dhanu</option>
+            <option value="Makara">Makara</option>
+            <option value="Kumbha">Kumbha</option>
+            <option value="Meena">Meena</option>
+          </select>
+          <select id="refLang" style="margin-left:8px;">
+            <option value="english">ENGLISH</option>
+            <option value="sanskrit">SANSKRIT</option>
+            <option value="telugu">TELUGU</option>
+            <option value="kannada">KANNADA</option>
+          </select>
+          <button id="chooseFileBtn" class="file-button" style="margin-left:12px;">UPLOAD</button>
+          <input id="fileInput" type="file" accept="application/json" style="display:none;" />
+          <div style="margin-left:auto; display:flex; align-items:center;">
+          </div>
+        </div>
+        <!-- Second row: file summary showing loaded filename and record count -->
+        <div style="padding:6px 16px; border-top:1px solid rgba(255,255,255,.03);">
+          <span id="fileSummary" style="font-size:13px; color:var(--muted);">No file chosen</span>
+        </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container table-wrap">
+      <div class="panel table-panel">
+      <div class="toolbar">
+        <div><strong>Transit</strong></div>
+        <div class="right">
+          <span class="pill" id="activeDate">—</span>
+          <div style="margin-left:8px; font-size:13px; color:var(--muted);">Status: <span id="statusMsg">Ready</span></div>
+        </div>
+        </div>
+      <div>
+        <!-- Summary table: Date, Year, Weekday, Tithi, Nakshatra & Pada -->
+        <table class="detail-table" id="summaryTable" style="margin-bottom:12px;">
+          <tbody id="summaryBody"></tbody>
+        </table>
+
+        <table class="detail-table" id="detailTable">
+          <tbody id="detailBody"></tbody>
+        </table>
+        <div class="empty" id="emptyState" style="display:none;">No data for selected date.</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const DEFAULT_JSON_PATH = "default.json";
+    const TRANSIT_RULES_PATH = "planets-transit-results.json";
+    const GOCHARA_TEXT_PATH = "Gochara_phala_All_languages.json";
+
+    const state = {
+      raw: [],
+      filtered: [],
+      byKeyOptions: {},
+      sticky: {},
+      loadedFrom: "auto",
+      fieldsOrder: []
+    };
+
+    const els = {
+      date: document.getElementById('dateInput'),
+      step: document.getElementById('stepSelect'),
+      janma: document.getElementById('janmaRashi'),
+      refLang: document.getElementById('refLang'),
+  file: document.getElementById('fileInput'),
+  chooseFileBtn: document.getElementById('chooseFileBtn'),
+  fileSummary: document.getElementById('fileSummary'),
+      prev: document.getElementById('prevBtn'),
+      next: document.getElementById('nextBtn'),
+      status: document.getElementById('statusMsg'),
+      detailBody: document.getElementById('detailBody'),
+      empty: document.getElementById('emptyState'),
+      activeDate: document.getElementById('activeDate'),
+      
+    };
+
+    const detailTableEl = document.getElementById('detailTable');
+
+    function setTableMode(expanded) {
+      if (!detailTableEl) return;
+      if (expanded) {
+        detailTableEl.classList.add('expanded');
+      } else {
+        detailTableEl.classList.remove('expanded');
+      }
+      try { localStorage.setItem('transitTableExpanded', expanded ? '1' : '0'); } catch (e) {}
+    }
+
+    function setStatus(text, type) {
+      els.status.textContent = text;
+      if (type === 'error') els.status.style.color = 'var(--danger)';
+      else if (type === 'ok') els.status.style.color = 'var(--ok)';
+      else els.status.style.color = 'var(--muted)';
+    }
+
+    function parseDateFlexible(d) {
+      if (!d) return null;
+      if (d instanceof Date) return d;
+      if (/^\d{4}-\d{2}-\d{2}$/.test(d)) return new Date(d + 'T00:00:00');
+      const m = d.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{2,4})$/);
+      if (m) {
+        const dd = m[1].padStart(2,'0');
+        const mm = m[2].padStart(2,'0');
+        let yyyy = m[3];
+        if (yyyy.length === 2) yyyy = (yyyy > '50' ? '19' : '20') + yyyy;
+        return new Date(`${yyyy}-${mm}-${dd}T00:00:00`);
+      }
+      const t = Date.parse(d);
+      return isNaN(t) ? null : new Date(t);
+    }
+
+    function formatDateISO(d) {
+      if (!d) return '';
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth()+1).padStart(2,'0');
+      const dd = String(d.getDate()).padStart(2,'0');
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
+    function formatDateDMY(d) {
+      const dt = parseDateFlexible(d);
+      if (!dt) return '';
+      const dd = String(dt.getDate()).padStart(2,'0');
+      const mm = String(dt.getMonth()+1).padStart(2,'0');
+      const yyyy = dt.getFullYear();
+      return `${dd}-${mm}-${yyyy}`;
+    }
+
+    function uniq(values) {
+      return Array.from(new Set(values.filter(v => v != null && String(v).trim() !== ''))).sort((a,b)=>String(a).localeCompare(String(b)));
+    }
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+    }
+
+    function normalizeLanguageKey(k) {
+      if (!k) return 'english';
+      const s = String(k).toLowerCase();
+      if (s.startsWith('san')) return 'sanskrit';
+      if (s.startsWith('eng')) return 'english';
+      if (s.startsWith('tel')) return 'telugu';
+      if (s.startsWith('kan')) return 'kannada';
+      return s;
+    }
+
+    function getFieldCI(obj, wantedKey) {
+      // Case-insensitive key fetch, tolerates BOM \uFEFF and surrounding spaces
+      const target = String(wantedKey).toLowerCase();
+      for (const k of Object.keys(obj || {})) {
+        const norm = String(k).replace(/^\ufeff/, '').trim().toLowerCase();
+        if (norm === target) return obj[k];
+      }
+      return undefined;
+    }
+
+    function getAnyKeyIncludes(obj, needle) {
+      const t = String(needle).toLowerCase();
+      for (const k of Object.keys(obj || {})) {
+        const norm = String(k).replace(/^\ufeff/, '').trim().toLowerCase();
+        if (norm.includes(t)) return obj[k];
+      }
+      return undefined;
+    }
+
+    function buildGocharaIndex(items) {
+      const index = {};
+      let arr = items;
+      if (!Array.isArray(arr)) {
+        // Try common containers
+        if (Array.isArray(items?.planets)) arr = items.planets;
+        else if (Array.isArray(items?.records)) arr = items.records;
+        else if (Array.isArray(items?.data)) arr = items.data;
+        else arr = Object.values(items || {});
+      }
+      if (!Array.isArray(arr)) return index;
+      for (const it of arr) {
+        const grahaRaw = getFieldCI(it, 'Graha');
+        const graha = (grahaRaw != null ? grahaRaw : getAnyKeyIncludes(it, 'graha') || getAnyKeyIncludes(it, 'planet') || '').toString().replace(/^\ufeff/, '').trim();
+        const distRaw = getFieldCI(it, 'Gochara');
+        const dist = distRaw != null ? distRaw : (getAnyKeyIncludes(it, 'gochara') ?? getAnyKeyIncludes(it, 'distance') ?? getAnyKeyIncludes(it, 'house'));
+        const distNum = Number(String(dist).trim());
+        if (!graha || !Number.isFinite(distNum)) continue;
+        const key = graha.toLowerCase() + '|' + distNum;
+        index[key] = it;
+      }
+      return index;
+    }
+
+    const RASHI_TO_INDEX = {'mesha':1,'vrushaba':2,'vrishabha':2,'mithuna':3,'karka':4,'karkataka':4,'simha':5,'kanya':6,'tula':7,'vrischika':8,'vrushchika':8,'scorpio':8,'dhanu':9,'sagittarius':9,'makara':10,'capricorn':10,'kumbha':11,'aquarius':11,'meena':12,'pisces':12};
+  const PLANET_KEYS = ['Surya','Chandra','Kuja','Budha','Guru','Sukra','Shani','Rahu','Ketu'];
+  // Year intentionally removed from summary display
+  const SUMMARY_KEYS = ['Date','Weekday','Tithi','Nakshatra & Pada'];
+    const PLANET_ALIAS_TO_RULE = {'Surya':'Surya','Chandra':'Chandra','Kuja':'Kuja','Budha':'Budha','Guru':'Guru','Sukra':'Sukra','Shani':'Shani','Rahu':'Rahu','Ketu':'Ketu'};
+
+    function valueToRashiIndex(value) {
+      if (value == null) return null;
+      const s = String(value).trim();
+      if (s === '') return null;
+      const num = Number(s);
+      if (!Number.isNaN(num)) {
+        const idx = Math.floor(((num % 360) + 360) % 360 / 30) + 1;
+        return idx;
+      }
+      const key = s.toLowerCase();
+      for (const [name, idx] of Object.entries(RASHI_TO_INDEX)) {
+        if (key.includes(name)) return idx;
+      }
+      return null;
+    }
+    function distanceHouse(fromIdx, toIdx) { if (!fromIdx || !toIdx) return null; return ((toIdx - fromIdx + 12) % 12) + 1; }
+
+    function findIndexByDate(dateObj) {
+      const iso = formatDateISO(dateObj);
+      return state.raw.findIndex(r => formatDateISO(parseDateFlexible(r.Date)) === iso);
+    }
+
+    function renderDetailForIndex(i) {
+      if (i < 0 || i >= state.raw.length) {
+        els.detailBody.innerHTML = '';
+        els.empty.style.display = 'block';
+        els.activeDate.textContent = '—';
+        return;
+      }
+      const row = state.raw[i];
+      els.empty.style.display = 'none';
+      const dateStr = row.Date || formatDateISO(parseDateFlexible(row.Date));
+      els.activeDate.textContent = dateStr;
+      const frag = document.createDocumentFragment();
+      // Render single-line Panchanga summary (Date, Weekday, Tithi, Nakshatra & Pada)
+      const summaryBody = document.getElementById('summaryBody');
+      if (summaryBody) {
+        const dmy = formatDateDMY(row.Date || dateStr);
+        const wd = row['Weekday'] || '';
+        const tithi = row['Tithi'] || '';
+        const nakPada = row['Nakshatra & Pada'] || '';
+        const parts = [];
+        if (dmy) parts.push(dmy);
+        if (wd) parts.push(wd);
+        if (tithi) parts.push(tithi);
+        if (nakPada) parts.push(nakPada);
+        const panchanga = parts.length ? ('Panchanga: ' + parts.join(', ')) : '';
+        summaryBody.innerHTML = '<tr><td colspan="5" class="value">' + escapeHtml(panchanga) + '</td></tr>';
+      }
+  // Date is shown in the summary table; do not add a duplicate Date row here.
+      const janmaIdx = RASHI_TO_INDEX[(els.janma?.value||'').toLowerCase()] || null;
+      const order = (state.fieldsOrder && state.fieldsOrder.length ? state.fieldsOrder : Object.keys(row).filter(k => k !== 'Date'))
+        .filter(k => !PLANET_KEYS.includes(k))
+        .filter(k => !SUMMARY_KEYS.includes(k))
+        .filter(k => k !== 'Nakshatra' && k !== 'Pada')
+        .filter(k => k !== 'Year');
+      for (const key of order) {
+    const tr = document.createElement('tr');
+    const th = document.createElement('td'); th.className = 'label'; th.textContent = key;
+    const td = document.createElement('td'); td.className = 'value'; td.textContent = row[key] != null ? String(row[key]) : '';
+    const tddist = document.createElement('td'); tddist.className = 'distance'; tddist.textContent = '';
+    const tdres = document.createElement('td'); tdres.className = 'result'; tdres.textContent = '';
+    const tdref = document.createElement('td'); tdref.className = 'reference'; tdref.textContent = '';
+  tr.appendChild(th); tr.appendChild(td); tr.appendChild(tddist); tr.appendChild(tdres); tr.appendChild(tdref); frag.appendChild(tr);
+      }
+
+      // Planet transit section: only planet short names + result tag
+  const planetKeysPresent = PLANET_KEYS.filter(k => row.hasOwnProperty(k));
+  // Show planet transit section only when a Janma Rashi is selected
+  if (planetKeysPresent.length && (els.janma && els.janma.value)) {
+  // Compute map of planet -> transit house (Tr) for quick lookup
+  const planetTransitMap = {};
+  for (const key of planetKeysPresent) {
+    const planetValueTmp = row[key] != null ? row[key] : '';
+    const planetRashiTmp = valueToRashiIndex(planetValueTmp);
+    const distTmp = janmaIdx ? distanceHouse(janmaIdx, planetRashiTmp) : null;
+    if (distTmp != null) planetTransitMap[key] = distTmp;
+  }
+
+  // Header row for planet transit sub-table
+  const trHead = document.createElement('tr');
+  const thP = document.createElement('th'); thP.className = 'planet-name'; thP.textContent = 'Graha';
+  const thDist = document.createElement('th'); thDist.className = 'planet-dist'; thDist.textContent = 'Tr';
+  const thVeda = document.createElement('th'); thVeda.className = 'planet-veda'; thVeda.textContent = 'Veda';
+  const thVedaEffect = document.createElement('th'); thVedaEffect.className = 'planet-veda-effect'; thVedaEffect.textContent = 'Veda Effect';
+  const thRes = document.createElement('th'); thRes.className = 'planet-res'; thRes.textContent = 'Phala';
+  const thRef = document.createElement('th'); thRef.className = 'planet-ref'; thRef.textContent = 'Reference';
+  trHead.appendChild(thP); trHead.appendChild(thDist); trHead.appendChild(thVeda); trHead.appendChild(thVedaEffect); trHead.appendChild(thRes); trHead.appendChild(thRef); frag.appendChild(trHead);
+
+        for (const key of planetKeysPresent) {
+          const tr = document.createElement('tr');
+          const th = document.createElement('td'); th.className = 'label planet-name'; th.textContent = key; // full planet name
+          const planetValue = row[key] != null ? row[key] : '';
+          const planetRashi = valueToRashiIndex(planetValue);
+          const tddist = document.createElement('td'); tddist.className = 'distance planet-dist';
+          const tdres = document.createElement('td'); tdres.className = 'result planet-res';
+          const tdveda = document.createElement('td'); tdveda.className = 'planet-veda';
+          const tdvedaEffect = document.createElement('td'); tdvedaEffect.className = 'planet-veda-effect';
+          const dist = janmaIdx ? distanceHouse(janmaIdx, planetRashi) : null;
+          tddist.textContent = dist != null ? String(dist) : '';
+          const rulesName = PLANET_ALIAS_TO_RULE[key] || key;
+          let resultTag = '';
+          let matchedRule = null;
+          if (Array.isArray(state.transitRules)) {
+            matchedRule = state.transitRules.find(r => (r.name||'').toLowerCase() === (rulesName||'').toLowerCase());
+            if (dist && matchedRule) {
+              if (Array.isArray(matchedRule.positiveTransit) && matchedRule.positiveTransit.includes(dist)) resultTag = 'Ausp<span class="tick green">✅</span>';
+              else if (Array.isArray(matchedRule.negativeTransit) && matchedRule.negativeTransit.includes(dist)) resultTag = 'In-Ausp<span class="tick red">❌</span>';
+            }
+          }
+          // Populate Veda column from matched rule if available. Use case-insensitive key fetch for veda mapping.
+          let vedaDisplay = '';
+          if (matchedRule) {
+            // rule.veda may be an object mapping transit numbers to values
+            const vedaMap = getFieldCI(matchedRule, 'veda') || getAnyKeyIncludes(matchedRule, 'veda') || matchedRule.veda;
+            try {
+              if (vedaMap && typeof vedaMap === 'object') {
+                const mapped = vedaMap[String(dist)];
+                if (mapped != null && String(mapped).trim() !== '') vedaDisplay = String(mapped);
+              }
+            } catch (e) { /* ignore */ }
+          }
+          tdveda.textContent = vedaDisplay || '—';
+          // Determine Veda Effect: check if any other planet's Tr equals this planet's Veda house
+          let vedaEffectText = '—';
+          try {
+            const vedaHouseNum = vedaDisplay ? Number(String(vedaDisplay)) : NaN;
+            if (!Number.isNaN(vedaHouseNum)) {
+              let foundNormal = false;
+              let foundVipareeta = false;
+              for (const [otherPlanet, otherTr] of Object.entries(planetTransitMap)) {
+                if (otherPlanet === key) continue; // ignore same planet
+                if (Number(otherTr) === Number(vedaHouseNum)) {
+                  // Found an obstructing planet; check if that planet is in its own auspicious house
+                  const otherRulesName = PLANET_ALIAS_TO_RULE[otherPlanet] || otherPlanet;
+                  let otherRule = null;
+                  if (Array.isArray(state.transitRules)) {
+                    otherRule = state.transitRules.find(r => (r.name||'').toLowerCase() === (otherRulesName||'').toLowerCase());
+                  }
+                  if (otherRule && Array.isArray(otherRule.positiveTransit) && otherRule.positiveTransit.map(Number).includes(Number(otherTr))) {
+                    foundVipareeta = true; break;
+                  } else {
+                    foundNormal = true;
+                  }
+                }
+              }
+              if (foundVipareeta) vedaEffectText = 'V-VEDA';
+              else if (foundNormal) vedaEffectText = 'VEDA';
+            }
+          } catch (e) { /* ignore */ }
+          // Render short labels with colored tick marks
+          if (vedaEffectText === 'V-VEDA') {
+            tdvedaEffect.innerHTML = 'V-VEDA<span class="tick green">✅</span>';
+          } else if (vedaEffectText === 'VEDA') {
+            tdvedaEffect.innerHTML = 'VEDA<span class="tick red">❌</span>';
+          } else {
+            tdvedaEffect.textContent = '—';
+          }
+          // set simple phala text; apply class for color if needed
+          if (resultTag && resultTag.startsWith('Ausp')) {
+            tdres.innerHTML = resultTag;
+            tdres.classList.add('phala','ausp');
+            tdres.classList.remove('inausp');
+          } else if (resultTag && resultTag.startsWith('In-Ausp')) {
+            tdres.innerHTML = resultTag;
+            tdres.classList.add('phala','inausp');
+            tdres.classList.remove('ausp');
+          } else {
+            tdres.textContent = '';
+            tdres.classList.remove('phala','ausp','inausp');
+          }
+          const tdref = document.createElement('td'); tdref.className = 'reference planet-ref';
+          if (dist != null && state.gocharaIndex) {
+            const rec = state.gocharaIndex[(key||'').toString().toLowerCase() + '|' + dist];
+            if (rec) {
+              const langKey = normalizeLanguageKey(els.refLang?.value || 'english');
+              // Try exact, uppercase, capitalized, and partial key matches
+              let text = getFieldCI(rec, langKey) || getFieldCI(rec, langKey.toUpperCase()) || getFieldCI(rec, langKey[0].toUpperCase()+langKey.slice(1));
+              if (!text) text = getAnyKeyIncludes(rec, langKey);
+              tdref.textContent = text || '';
+            }
+          }
+          tr.appendChild(th); tr.appendChild(tddist); tr.appendChild(tdveda); tr.appendChild(tdvedaEffect); tr.appendChild(tdres); tr.appendChild(tdref); frag.appendChild(tr);
+        }
+      }
+      els.detailBody.innerHTML = '';
+      els.detailBody.appendChild(frag);
+    }
+
+    function stepDateSigned(sign) {
+      if (!els.date.value) return;
+      const d = parseDateFlexible(els.date.value);
+      const mode = els.step.value;
+      if (mode === 'day') {
+        d.setDate(d.getDate() + 1 * sign);
+      } else if (mode === 'week') {
+        d.setDate(d.getDate() + 7 * sign);
+      } else if (mode === 'month') {
+        const m = d.getMonth();
+        d.setMonth(m + 1 * sign);
+      } else if (mode === 'year') {
+        d.setFullYear(d.getFullYear() + 1 * sign);
+      }
+      els.date.value = formatDateISO(d);
+      onDateChange();
+    }
+
+    async function readLocalFile(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = () => reject(reader.error);
+        reader.onload = () => {
+          try { resolve(JSON.parse(reader.result)); }
+          catch (e) { reject(e); }
+        };
+        reader.readAsText(file);
+      });
+    }
+
+    async function loadData() {
+      setStatus('Loading data...', '');
+      let data = null;
+      // If a file is chosen, prefer that
+      if (els.file.files && els.file.files[0]) {
+        try {
+          data = await readLocalFile(els.file.files[0]);
+          state.loadedFrom = 'file';
+        } catch (e) {
+          console.error(e);
+          setStatus('Failed reading local file', 'error');
+          return;
+        }
+      } else {
+        // Try auto fetch relative JSON
+        try {
+          const res = await fetch(DEFAULT_JSON_PATH, { cache: 'no-store' });
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          data = await res.json();
+          state.loadedFrom = 'auto';
+        } catch (e) {
+          console.warn('Auto fetch failed, prompt for file instead.', e);
+          setStatus('Could not auto-load JSON. Select a file above.', 'error');
+          state.raw = [];
+          state.filtered = [];
+          renderTable();
+          return;
+        }
+      }
+      // Load transit rules
+      try {
+        const rr = await fetch(TRANSIT_RULES_PATH, { cache: 'no-store' });
+        if (rr.ok) {
+          const rulesJson = await rr.json();
+          state.transitRules = Array.isArray(rulesJson?.planets) ? rulesJson.planets : [];
+        } else {
+          state.transitRules = [];
+        }
+      } catch (e) { state.transitRules = []; }
+      // Load gochara reference texts
+      try {
+        const gt = await fetch(GOCHARA_TEXT_PATH, { cache: 'no-store' });
+        if (gt.ok) {
+          const arr = await gt.json();
+          state.gocharaIndex = buildGocharaIndex(arr);
+        } else {
+          state.gocharaIndex = {};
+        }
+      } catch (e) { state.gocharaIndex = {}; }
+      if (!Array.isArray(data)) {
+        setStatus('JSON should be an array of objects', 'error');
+        return;
+      }
+      // Normalize and compute derived fields
+      state.raw = data.map(r => {
+        const row = { ...r };
+        const nak = r.Nakshatra != null ? String(r.Nakshatra) : '';
+        const pada = r.Pada != null ? String(r.Pada) : '';
+        const combined = (nak || pada) ? `${nak}${nak&&pada?'-':''}${pada}` : '';
+        if (!row['Nakshatra & Pada'] || row['Nakshatra & Pada'] === '' ) {
+          row['Nakshatra & Pada'] = combined;
+        }
+        return row;
+      });
+      // Determine fields order dynamically from first row
+      const firstRow = state.raw.find(r => r && typeof r === 'object') || {};
+      state.fieldsOrder = Object.keys(firstRow).filter(k => k !== 'Date');
+
+      // Sort by date
+      state.raw.sort((a,b)=>{
+        const da = parseDateFlexible(a.Date); const db = parseDateFlexible(b.Date);
+        return (da-db);
+      });
+      // Initialize date input to first date or keep existing
+      if (!els.date.value && state.raw.length) {
+        const first = parseDateFlexible(state.raw[0].Date);
+        els.date.value = formatDateISO(first);
+      }
+      onDateChange();
+      // Update file summary with filename and loaded rows
+      try {
+        const count = state.raw.length;
+        let name = '';
+        if (state.loadedFrom === 'file' && els.file && els.file.files && els.file.files[0]) {
+          name = els.file.files[0].name || '';
+        } else {
+          name = DEFAULT_JSON_PATH;
+        }
+        if (els.fileSummary) {
+          // show full name in summary and keep status tooltip on the element
+          els.fileSummary.textContent = (name || 'No file') + ' — ' + count + ' records';
+          els.fileSummary.title = name + ' — Loaded ' + count + ' rows';
+        }
+      } catch (e) { /* ignore */ }
+      // Keep main status for transient messages; mark ready
+      setStatus('Ready', 'ok');
+    }
+
+    function onDateChange() {
+      const d = parseDateFlexible(els.date.value);
+      if (!d) { els.activeDate.textContent = '—'; els.detailBody.innerHTML=''; els.empty.style.display='block'; return; }
+      const idx = findIndexByDate(d);
+      renderDetailForIndex(idx);
+    }
+
+    function attachEvents() {
+      if (els.chooseFileBtn && els.file) {
+        els.chooseFileBtn.addEventListener('click', (e) => { e.preventDefault(); els.file.click(); });
+      }
+      if (els.file) {
+        els.file.addEventListener('change', () => {
+          loadData();
+        });
+      }
+      els.date.addEventListener('change', onDateChange);
+      if (els.janma) els.janma.addEventListener('change', onDateChange);
+      if (els.refLang) els.refLang.addEventListener('change', onDateChange);
+      els.prev.addEventListener('click', (e)=>{ e.preventDefault(); stepDateSigned(-1); });
+      els.next.addEventListener('click', (e)=>{ e.preventDefault(); stepDateSigned(1); });
+      // compact toggle removed
+    }
+
+    // Init
+    (function init(){
+      attachEvents();
+      // Set sensible defaults: current date and Janma Rashi = Mesha
+      try {
+        if (!els.date.value) els.date.value = formatDateISO(new Date());
+        // Keep Janma Rashi default as 'Select' (empty) so planet table is hidden until user chooses
+        if (els.janma) els.janma.value = '';
+      } catch (e) {}
+      // Attempt to pre-load data (may fail on file://); user can select file
+      loadData();
+    })();
+  </script>
+</body>
+</html>
+
+
