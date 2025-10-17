@@ -38,12 +38,12 @@
     }
 
     .app-title {
-      font-size: 36px;
+      font-size: 27px;
       font-weight: 800;
       letter-spacing: .4px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
+      /* center title in the header row */
+      display: block;
+      text-align: center;
       margin: 8px 0 16px;
     }
     .app-title .badge {
@@ -54,6 +54,13 @@
       color: #0b1020;
       font-weight: 700;
     }
+
+    /* Header layout: left brand, centered app title */
+    .header-row { display:flex; align-items:center; justify-content:space-between; gap:16px; }
+    .brand { display:flex; align-items:center; gap:12px; }
+  .brand img { width:84px; height:auto; display:block; }
+  .brand h1 { margin:0; font-size:27px; letter-spacing:2px; font-weight:800; }
+  .header-spacer { width:84px; }
 
   /* Removed sticky positioning so controls don't stick to viewport */
   .controls-wrap { border-bottom: 1px solid var(--border); background: linear-gradient(180deg, rgba(13,18,38,.9), rgba(13,18,38,.75)); position: static; }
@@ -205,9 +212,15 @@
 </head>
 <body>
   <div class="container">
-    <div class="app-title">
-      <span>🗓️ Transit Navigator</span>
-      <span class="badge">BETA</span>
+    <div class="header-row">
+      <div class="brand">
+        <a href="https://vaiswanara.com" style="display:flex; align-items:center; gap:12px; text-decoration:none; color:inherit;">
+          <img src="logo.gif" alt="Vaiswanara logo" />
+          <h1>VAISWANARA</h1>
+        </a>
+      </div>
+      <div class="app-title"><span>Transit Navigator</span><span class="badge">BETA</span></div>
+      <div class="header-spacer" aria-hidden="true"></div>
     </div>
   </div>
 
@@ -248,12 +261,14 @@
           </select>
           <button id="chooseFileBtn" class="file-button" style="margin-left:12px;">Upload json</button>
           <input id="fileInput" type="file" accept="application/json" style="display:none;" />
-          <div style="margin-left:auto; display:flex; align-items:center;">
+          <div style="margin-left:auto; display:flex; align-items:center; gap:8px;">
+            <a id="aboutLink" href="handout.html" target="_blank" rel="noopener noreferrer" style="font-size:13px; color:var(--brand-2);">About this App</a>
           </div>
         </div>
         <!-- Second row: file summary showing loaded filename and record count -->
         <div style="padding:6px 16px; border-top:1px solid rgba(255,255,255,.03);">
           <span id="fileSummary" style="font-size:13px; color:var(--muted);">No file chosen</span>
+          <a id="gocharaDownload" href="https://vaiswanara.com/apps/" target="_blank" rel="noopener noreferrer" style="margin-left:12px; font-size:13px; color:var(--brand-2);">Click here to download Gochara Data files(json)</a>
         </div>
         </div>
       </div>
