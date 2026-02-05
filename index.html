@@ -2,303 +2,1032 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Panchanga Transit</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>Transit Navigator | Vaiswanara</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600&family=Noto+Sans+Kannada:wght@400;500;600&family=Noto+Sans+Telugu:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0b1020;
-      --panel: #121a33;
-      --panel-2: #0f1730;
-      --text: #e8eefc;
-      --muted: #a9b5d1;
-      --brand: #6aa1ff;
-      --brand-2: #8bd2ff;
-      --accent: #ffd166;
-      --danger: #ff6b6b;
-      --ok: #3ddc97;
-      --border: #223059;
-      --shadow: 0 6px 18px rgba(0,0,0,.35);
-      --radius: 12px;
+      /* Primary Colors - Deep cosmic theme */
+      --bg-primary: #0a0e1a;
+      --bg-secondary: #111827;
+      --bg-tertiary: #1a1f2e;
+      --bg-card: rgba(26, 31, 46, 0.85);
+      --bg-card-hover: rgba(31, 38, 56, 0.9);
+      
+      /* Accent Colors - Gold/Amber for astrology */
+      --accent-gold: #f59e0b;
+      --accent-gold-light: #fbbf24;
+      --accent-gold-dark: #d97706;
+      --accent-amber: #fbbf24;
+      
+      /* Brand Colors */
+      --brand-primary: #3b82f6;
+      --brand-secondary: #60a5fa;
+      --brand-glow: rgba(59, 130, 246, 0.3);
+      
+      /* Status Colors */
+      --success: #10b981;
+      --success-light: #34d399;
+      --danger: #ef4444;
+      --danger-light: #f87171;
+      --warning: #f59e0b;
+      
+      /* Text Colors */
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      
+      /* Border & Shadow */
+      --border-color: rgba(148, 163, 184, 0.15);
+      --border-gold: rgba(245, 158, 11, 0.3);
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
+      --shadow-glow: 0 0 20px rgba(245, 158, 11, 0.15);
+      
+      /* Spacing */
+      --space-xs: 0.25rem;
+      --space-sm: 0.5rem;
+      --space-md: 1rem;
+      --space-lg: 1.5rem;
+      --space-xl: 2rem;
+      --space-2xl: 3rem;
+      
+      /* Border Radius */
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --radius-xl: 24px;
+      
+      /* Transitions */
+      --transition-fast: 150ms ease;
+      --transition-base: 250ms ease;
+      --transition-slow: 350ms ease;
     }
-    * { box-sizing: border-box; }
-    html, body { height: 100%; }
-    body {
-      margin: 0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-      background: radial-gradient(1200px 800px at 20% 0%, #101735 0%, var(--bg) 60%);
-      color: var(--text);
-      font-size: 1.5rem;
-    }
-    a { color: var(--brand-2); }
 
-    .container {
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.6;
+      font-size: 15px;
+      overflow-x: hidden;
+    }
+
+    /* Cosmic Background Effect */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        radial-gradient(ellipse at 20% 0%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 100%, rgba(245, 158, 11, 0.05) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 50%, rgba(99, 102, 241, 0.03) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Star field effect */
+    .stars {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.4;
+    }
+
+    .star {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: white;
+      border-radius: 50%;
+      animation: twinkle 3s infinite ease-in-out;
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.2; }
+      50% { opacity: 0.8; }
+    }
+
+    /* Layout */
+    .app-container {
+      position: relative;
+      z-index: 1;
       max-width: 1400px;
       margin: 0 auto;
-      padding: 16px;
+      padding: var(--space-md);
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-md);
+      padding: var(--space-md) 0;
+      margin-bottom: var(--space-lg);
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      text-decoration: none;
+      color: inherit;
+      transition: transform var(--transition-fast);
+    }
+
+    .brand:hover {
+      transform: scale(1.02);
+    }
+
+    .brand-logo {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      object-fit: cover;
+      box-shadow: var(--shadow-md), 0 0 20px rgba(245, 158, 11, 0.2);
+      border: 2px solid var(--border-gold);
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand-name {
+      font-family: 'Cinzel', serif;
+      font-size: 1.5rem;
+      font-weight: 600;
+      letter-spacing: 2px;
+      color: var(--accent-gold-light);
+      text-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+    }
+
+    .brand-tagline {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .app-title-wrapper {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
     }
 
     .app-title {
-      font-size: 27px;
-      font-weight: 800;
-      letter-spacing: .4px;
-      /* center title in the header row */
-      display: block;
-      text-align: center;
-      margin: 8px 0 16px;
+      font-family: 'Cinzel', serif;
+      font-size: 1.25rem;
+      font-weight: 500;
+      color: var(--text-primary);
     }
-    .app-title .badge {
-      font-size: 12px;
-      padding: 4px 8px;
-      border-radius: 999px;
-      background: linear-gradient(135deg, var(--brand), var(--brand-2));
-      color: #0b1020;
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      font-size: 0.65rem;
       font-weight: 700;
-    }
-
-    /* Header layout: left brand, centered app title */
-    .header-row { display:flex; align-items:center; justify-content:space-between; gap:16px; }
-    .brand { display:flex; align-items:center; gap:12px; }
-  .brand img { width:84px; height:auto; display:block; }
-  .brand h1 { margin:0; font-size:27px; letter-spacing:2px; font-weight:800; }
-  .header-spacer { width:84px; }
-
-  /* Removed sticky positioning so controls don't stick to viewport */
-  .controls-wrap { border-bottom: 1px solid var(--border); background: linear-gradient(180deg, rgba(13,18,38,.9), rgba(13,18,38,.75)); position: static; }
-  .controls { display: flex; gap: 10px; align-items: center; padding: 12px 16px; flex-wrap: nowrap; overflow-x: auto; }
-  /* unify heights for controls */
-  .controls input[type="date"], .controls select, .controls button, .controls .file-button { font-size: 1.05em; height: 44px; line-height: 1; padding: 8px 12px; }
-  .controls .field { display: flex; align-items: center; }
-  /* prevent the global width:100% rule from forcing controls to stack; keep them auto-sized inside .controls */
-  .controls input[type="date"], .controls select, .controls button, .controls .file-button { width: auto !important; min-width: 90px; }
-  /* explicit sizes for important controls to keep single-line layout */
-  #dateInput { width: 150px; }
-  #stepSelect { width: 110px; }
-  #janmaRashi { width: 170px; }
-  #refLang { width: 130px; }
-    .panel {
-      background: linear-gradient(180deg, var(--panel), var(--panel-2));
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-    }
-    .field {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    label { font-size: 18px; color: var(--muted); }
-    input[type="date"], select, button, input[type="file"] {
-      width: 100%;
-      background: #0e1530;
-      color: var(--text);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 10px 12px;
-      outline: none;
-      transition: border .2s ease, box-shadow .2s ease;
-    }
-    input[type="date"]:focus, select:focus, button:focus, input[type="file"]:focus { border-color: var(--brand-2); box-shadow: 0 0 0 3px rgba(139,210,255,.15); }
-    button {
-      background: linear-gradient(135deg, var(--brand), var(--brand-2));
-      color: #0b1020;
-      font-weight: 800;
       text-transform: uppercase;
-      letter-spacing: .4px;
-      cursor: pointer;
+      letter-spacing: 1px;
+      background: linear-gradient(135deg, var(--accent-gold), var(--accent-gold-dark));
+      color: var(--bg-primary);
+      border-radius: 999px;
     }
-    button.secondary { background: transparent; color: var(--text); border: 1px dashed var(--border); }
-    button:disabled { opacity: .6; cursor: not-allowed; }
 
-    .hint {
-      grid-column: 1 / -1;
-      color: var(--muted);
-      font-size: 12px;
+    /* Control Panel */
+    .control-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      margin-bottom: var(--space-lg);
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+    }
+
+    .control-panel-header {
       display: flex;
       align-items: center;
-      gap: 8px;
+      justify-content: space-between;
+      padding: var(--space-md) var(--space-lg);
+      background: linear-gradient(90deg, rgba(245, 158, 11, 0.1), transparent);
+      border-bottom: 1px solid var(--border-color);
     }
 
-  .table-wrap { margin-top: 16px; }
-  .table-panel { padding: 12px; overflow-x: auto; }
-
-  /* Detail table: enable wrapping and auto-sizing */
-  .detail-table { width: 100%; border-collapse: collapse; min-width: 360px; table-layout: auto; }
-  .detail-table th, .detail-table td { padding: 10px 12px; border: 1px solid var(--border); font-size: 1.05em; white-space: normal; overflow-wrap: anywhere; word-break: break-word; vertical-align: middle; text-align: center; }
-  .detail-table th { background: #c6a400; color: #0b1020; font-weight: 800; font-size: 1.1em; }
-  .detail-table .label { width: 220px; font-weight: 800; color: var(--text); background: rgba(255,255,255,.06); }
-  .detail-table .value { color: #dfe7fb; }
-  .detail-table .distance { width: 120px; text-align: center; color: #dfe7fb; }
-  .detail-table .result { width: 180px; text-align: center; }
-  .detail-table .reference { color: #e8eefc; }
-
-  /* Planet-specific columns: slightly narrower to avoid excessive width */
-  /* Make planet columns more compact; allow wrapping inside */
-  /* planet-name and planet-dist reduced by ~35% */
-  .detail-table .planet-name { width: 78px; max-width: 130px; overflow-wrap: anywhere; }
-  .detail-table .planet-dist { width: 46px; max-width: 58px; text-align: center; }
-  .detail-table .planet-res { width: 120px; max-width: 180px; text-align: center; }
-  .detail-table td.planet-veda { width: 80px; max-width: 120px; text-align: center; color: #dfe7fb; }
-  .detail-table td.planet-veda-effect { width: 140px; max-width: 200px; text-align: center; color: #dfe7fb; }
-  .detail-table .planet-veda-effect .tick { font-weight: 900; margin-left: 6px; }
-  .detail-table .planet-veda-effect .tick.red { color: #ff4d4d; }
-  .detail-table .planet-veda-effect .tick.green { color: #3ddc97; }
-  /* Global tick styles so ticks can be reused elsewhere (Phala column) */
-  .tick { font-weight: 900; margin-left: 6px; }
-  .tick.red { color: #ff4d4d; }
-  .tick.green { color: #3ddc97; }
-  /* Phala simple text (no rounded tag) */
-  .phala { background: none; border: none; border-radius: 0; font-weight: 800; padding: 0; }
-  .phala.ausp { color: #3ddc97; }
-  .phala.inausp { color: #ff8a8a; }
-  /* Reference column expanded as much as reasonable */
-  .detail-table .planet-ref { width: 520px; max-width: 1200px; overflow-wrap: anywhere; }
-
-  /* Expanded mode: loosen widths for easier readability */
-  .detail-table.expanded .planet-name { width: 320px; max-width: 520px; }
-  .detail-table.expanded .planet-dist { width: 90px; max-width: 140px; }
-  .detail-table.expanded .planet-res { width: 220px; max-width: 420px; }
-  .detail-table.expanded .planet-ref { width: 900px; max-width: 2000px; }
-    .tag { display:inline-block; padding: 6px 10px; border-radius: 999px; font-weight: 700; }
-    .tag.ausp { background: rgba(61,220,151,.15); color: #52e2ad; border: 1px solid rgba(61,220,151,.35); }
-    .tag.inausp { background: rgba(255,107,107,.15); color: #ff8a8a; border: 1px solid rgba(255,107,107,.35); }
-
-    .status {
-      display: inline-flex; align-items: center; gap: 6px;
-      font-size: 18px; color: var(--muted);
-    }
-    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--brand-2); box-shadow: 0 0 0 6px rgba(139,210,255,.12); }
-
-    .toolbar {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 12px 16px; border-bottom: 1px solid var(--border);
-    }
-    .toolbar .right { display: flex; align-items: center; gap: 8px; }
-    .pill {
-      background: #0e1530; border: 1px solid var(--border); color: var(--muted);
-      font-size: 18px; padding: 8px 14px; border-radius: 999px;
+    .control-panel-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--accent-gold-light);
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
     }
 
-    .empty { color: var(--muted); text-align: center; padding: 36px; }
+    .control-panel-title::before {
+      content: '◈';
+      color: var(--accent-gold);
+    }
 
-    @media (max-width: 1200px) {
-      .detail-table th, .detail-table td { font-size: 1em; padding: 8px 10px; }
-      .app-title { font-size: 30px; }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: var(--space-md) var(--space-lg);
     }
-    @media (max-width: 920px) {
-      .controls { flex-wrap: wrap; gap: 8px; }
-      .controls .field { width: 100%; }
-      .controls input[type="date"], .controls select, .controls button, .controls .file-button { flex: 1 1 auto; min-width: 120px; }
-      #janmaRashi { width: auto; }
-      #refLang { width: auto; }
+
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
     }
-    @media (max-width: 640px) {
-      body { font-size: 1.05rem; }
-      .container { padding: 12px; }
-      .controls input[type="date"], .controls select, .controls button, .controls .file-button { min-width: 48%; }
-      #dateInput { flex: 1 1 48%; }
-      .controls { justify-content: flex-start; }
-      .pill { font-size: 16px; padding: 6px 10px; }
-      .detail-table th, .detail-table td { font-size: .95em; padding: 8px; }
-      .planet-ref { max-width: 60vw; }
-      .hint { font-size: 11px; }
+
+    .control-label {
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
     }
-    @media (max-width: 420px) {
-      body { font-size: .95rem; }
-      .controls input[type="date"], .controls select, .controls button, .controls .file-button { min-width: 100%; }
-      .toolbar { flex-wrap: wrap; gap: 8px; }
-      .toolbar .right { width: 100%; justify-content: space-between; }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-xs);
+      padding: 10px 16px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      border: none;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-gold), var(--accent-gold-dark));
+      color: var(--bg-primary);
+      box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(245, 158, 11, 0.5);
+    }
+
+    .btn-secondary {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--border-gold);
+    }
+
+    .btn-icon {
+      width: 40px;
+      height: 40px;
+      padding: 0;
+      font-size: 1.1rem;
+    }
+
+    /* Form Elements */
+    .form-control {
+      padding: 10px 14px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      outline: none;
+      transition: all var(--transition-fast);
+      min-width: 120px;
+    }
+
+    .form-control:focus {
+      border-color: var(--accent-gold);
+      box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
+    }
+
+    select.form-control {
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 32px;
+    }
+
+    input[type="date"].form-control {
+      font-family: inherit;
+    }
+
+    /* File Upload Section */
+    .file-section {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: var(--space-sm);
+      padding: var(--space-sm) var(--space-lg);
+      background: rgba(0, 0, 0, 0.2);
+      border-top: 1px solid var(--border-color);
+    }
+
+    .file-info {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      flex-wrap: wrap;
+    }
+
+    .file-status {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      font-size: 0.8125rem;
+      color: var(--text-secondary);
+    }
+
+    .file-status::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--text-muted);
+    }
+
+    .file-status.loaded::before {
+      background: var(--success);
+      box-shadow: 0 0 8px var(--success);
+    }
+
+    .file-name {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .file-count {
+      color: var(--accent-gold-light);
+    }
+
+    .link-download {
+      font-size: 0.8125rem;
+      color: var(--brand-secondary);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+      transition: color var(--transition-fast);
+    }
+
+    .link-download:hover {
+      color: var(--accent-gold-light);
+    }
+
+    .link-about {
+      font-size: 0.8125rem;
+      color: var(--text-secondary);
+      text-decoration: none;
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-color);
+      transition: all var(--transition-fast);
+    }
+
+    .link-about:hover {
+      border-color: var(--accent-gold);
+      color: var(--accent-gold-light);
+    }
+
+    /* Results Panel */
+    .results-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+    }
+
+    .results-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: var(--space-md);
+      padding: var(--space-md) var(--space-lg);
+      background: linear-gradient(90deg, rgba(59, 130, 246, 0.1), transparent);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .results-title {
+      font-family: 'Cinzel', serif;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    .results-title::before {
+      content: '☸';
+      color: var(--accent-gold);
+    }
+
+    .results-meta {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      flex-wrap: wrap;
+    }
+
+    .date-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-xs);
+      padding: 8px 16px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      background: var(--bg-tertiary);
+      color: var(--accent-gold-light);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--border-gold);
+    }
+
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+      font-size: 0.8125rem;
+      color: var(--text-secondary);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 8px var(--success);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .status-indicator.error .status-dot {
+      background: var(--danger);
+      box-shadow: 0 0 8px var(--danger);
+    }
+
+    /* Panchanga Summary Card */
+    .panchanga-card {
+      margin: var(--space-lg);
+      padding: var(--space-md) var(--space-lg);
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.08), rgba(59, 130, 246, 0.05));
+      border: 1px solid var(--border-gold);
+      border-radius: var(--radius-md);
+    }
+
+    .panchanga-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--accent-gold);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: var(--space-xs);
+    }
+
+    .panchanga-content {
+      font-size: 1rem;
+      color: var(--text-primary);
+      line-height: 1.7;
+    }
+
+    /* Tables */
+    .table-container {
+      overflow-x: auto;
+      margin: 0 var(--space-lg) var(--space-lg);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+      position: relative;
+    }
+
+    .table-container::after {
+      content: '⟷';
+      position: absolute;
+      bottom: 8px;
+      right: 8px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      opacity: 0.5;
+      pointer-events: none;
+      display: none;
+    }
+
+    @media (max-width: 768px) {
+      .table-container::after {
+        display: block;
+      }
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+      min-width: 600px;
+    }
+
+    .data-table th,
+    .data-table td {
+      padding: 14px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .data-table th {
+      background: var(--bg-tertiary);
+      font-weight: 600;
+      color: var(--accent-gold-light);
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+
+    .data-table tbody tr {
+      transition: background var(--transition-fast);
+    }
+
+    .data-table tbody tr:hover {
+      background: var(--bg-card-hover);
+    }
+
+    .data-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .data-table .label-cell {
+      font-weight: 600;
+      color: var(--text-secondary);
+      width: 180px;
+    }
+
+    .data-table .value-cell {
+      color: var(--text-primary);
+    }
+
+    /* Planet Table Specific */
+    .planet-table th {
+      text-align: center;
+    }
+
+    .planet-table td {
+      text-align: center;
+      vertical-align: middle;
+    }
+
+    .planet-table .planet-name {
+      font-weight: 600;
+      color: var(--brand-secondary);
+    }
+
+    .planet-table .transit-num {
+      font-family: 'Cinzel', serif;
+      font-weight: 600;
+      color: var(--accent-gold-light);
+    }
+
+    .planet-table .veda-cell {
+      color: var(--text-secondary);
+    }
+
+    /* Phala Tags */
+    .phala-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      border-radius: var(--radius-xl);
+    }
+
+    .phala-auspicious {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--success-light);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .phala-inauspicious {
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--danger-light);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .tick {
+      font-size: 0.875rem;
+    }
+
+    /* Veda Effect */
+    .veda-effect {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 600;
+    }
+
+    .veda-effect.positive {
+      color: var(--success-light);
+    }
+
+    .veda-effect.negative {
+      color: var(--danger-light);
+    }
+
+    /* Reference Text */
+    .reference-text {
+      max-width: 400px;
+      font-size: 0.8125rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+    }
+
+    /* Empty State */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-2xl);
+      text-align: center;
+      color: var(--text-muted);
+    }
+
+    .empty-state-icon {
+      font-size: 3rem;
+      margin-bottom: var(--space-md);
+      opacity: 0.5;
+    }
+
+    .empty-state-text {
+      font-size: 1rem;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1024px) {
+      .header {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .brand {
+        flex-direction: column;
+      }
+
+      .controls {
+        justify-content: center;
+      }
+    }
+
+    @media (max-width: 768px) {
+      :root {
+        --space-md: 0.875rem;
+        --space-lg: 1.25rem;
+      }
+
+      body {
+        font-size: 14px;
+      }
+
+      .brand-logo {
+        width: 52px;
+        height: 52px;
+      }
+
+      .brand-name {
+        font-size: 1.25rem;
+      }
+
+      .app-title {
+        font-size: 1.1rem;
+      }
+
+      .control-panel-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-sm);
+      }
+
+      .controls {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .control-group {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--space-xs);
+      }
+
+      .control-label {
+        font-size: 0.7rem;
+      }
+
+      .form-control {
+        width: 100%;
+        min-width: unset;
+      }
+
+      .btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .btn-icon {
+        width: 44px;
+        height: 44px;
+      }
+
+      .file-section {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .file-info {
+        flex-direction: column;
+        align-items: flex-start;
+        width: 100%;
+      }
+
+      .results-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .panchanga-card {
+        margin: var(--space-md);
+        padding: var(--space-md);
+      }
+
+      .table-container {
+        margin: 0 var(--space-md) var(--space-md);
+      }
+
+      .data-table th,
+      .data-table td {
+        padding: 12px;
+      }
+
+      .reference-text {
+        max-width: 250px;
+        font-size: 0.75rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .app-container {
+        padding: var(--space-sm);
+      }
+
+      .brand-name {
+        font-size: 1.1rem;
+      }
+
+      .results-title {
+        font-size: 1rem;
+      }
+
+      .date-pill {
+        font-size: 0.8125rem;
+        padding: 6px 12px;
+      }
+
+      .phala-tag {
+        padding: 4px 8px;
+        font-size: 0.75rem;
+      }
+    }
+
+    /* Scrollbar Styling */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg-secondary);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border-color);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--text-muted);
+    }
+
+    /* Selection */
+    ::selection {
+      background: rgba(245, 158, 11, 0.3);
+      color: var(--text-primary);
+    }
+
+    /* Focus Visible */
+    :focus-visible {
+      outline: 2px solid var(--accent-gold);
+      outline-offset: 2px;
+    }
+
+    /* Print Styles */
+    @media print {
+      body::before,
+      .stars {
+        display: none;
+      }
+
+      .control-panel,
+      .file-section {
+        display: none;
+      }
+
+      .results-panel {
+        box-shadow: none;
+        border: 1px solid #ccc;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="header-row">
-      <div class="brand">
-        <a href="https://vaiswanara.com" style="display:flex; align-items:center; gap:12px; text-decoration:none; color:inherit;">
-          <img src="logo.gif" alt="Vaiswanara logo" />
-          <h1>VAISWANARA</h1>
-        </a>
-      </div>
-      <div class="app-title"><span>Transit Navigator</span><span class="badge">BETA</span></div>
-      <div class="header-spacer" aria-hidden="true"></div>
-    </div>
-  </div>
+  <!-- Starfield Background -->
+  <div class="stars" id="starfield"></div>
 
-  <div class="controls-wrap">
-    <div class="container">
-      <div class="panel">
-        <div class="controls">
-          <!-- Single inline controls row: Prev, Date, Next, Step, Janma, RefLang, Choose File -->
-          <button id="prevBtn" class="secondary">◀</button>
-          <input id="dateInput" type="date" aria-label="Date" style="margin:0 8px;" />
-          <button id="nextBtn" class="secondary">▶</button>
-          <select id="stepSelect" style="margin-left:8px;">
+  <div class="app-container">
+    <!-- Header -->
+    <header class="header">
+      <a href="https://vaiswanara.com" class="brand">
+        <img src="logo.gif" alt="Vaiswanara" class="brand-logo">
+        <div class="brand-text">
+          <span class="brand-name">VAISWANARA</span>
+          <span class="brand-tagline">Vedic Astrology</span>
+        </div>
+      </a>
+      <div class="app-title-wrapper">
+        <span class="app-title">Transit Navigator</span>
+        <span class="badge">Beta</span>
+      </div>
+    </header>
+
+    <!-- Control Panel -->
+    <div class="control-panel">
+      <div class="control-panel-header">
+        <span class="control-panel-title">Navigation Controls</span>
+      </div>
+      <div class="controls">
+        <div class="control-group">
+          <button id="prevBtn" class="btn btn-secondary btn-icon" title="Previous">◀</button>
+          <input id="dateInput" type="date" class="form-control" aria-label="Select Date">
+          <button id="nextBtn" class="btn btn-secondary btn-icon" title="Next">▶</button>
+        </div>
+        <div class="control-group">
+          <span class="control-label">Step</span>
+          <select id="stepSelect" class="form-control">
             <option value="day">Day</option>
             <option value="week">Week</option>
             <option value="month">Month</option>
             <option value="year">Year</option>
           </select>
-          <select id="janmaRashi" style="margin-left:8px;">
-            <option value="">Select</option>
-            <option value="Mesha">Mesha</option>
-            <option value="Vrushaba">Vrushaba</option>
-            <option value="Mithuna">Mithuna</option>
-            <option value="Karka">Karka</option>
-            <option value="Simha">Simha</option>
-            <option value="Kanya">Kanya</option>
-            <option value="Tula">Tula</option>
-            <option value="Vrischika">Vrischika</option>
-            <option value="Dhanu">Dhanu</option>
-            <option value="Makara">Makara</option>
-            <option value="Kumbha">Kumbha</option>
-            <option value="Meena">Meena</option>
-          </select>
-          <select id="refLang" style="margin-left:8px;">
-            <option value="english">ENGLISH</option>
-            <option value="sanskrit">SANSKRIT</option>
-            <option value="telugu">TELUGU</option>
-            <option value="kannada">KANNADA</option>
-          </select>
-          <button id="chooseFileBtn" class="file-button" style="margin-left:12px;">Upload json</button>
-          <input id="fileInput" type="file" accept="application/json" style="display:none;" />
-          <div style="margin-left:auto; display:flex; align-items:center; gap:8px;">
-            <a id="aboutLink" href="handout.html" target="_blank" rel="noopener noreferrer" style="font-size:13px; color:var(--brand-2);">About this App</a>
-          </div>
         </div>
-        <!-- Second row: file summary showing loaded filename and record count -->
-        <div style="padding:6px 16px; border-top:1px solid rgba(255,255,255,.03);">
-          <span id="fileSummary" style="font-size:13px; color:var(--muted);">No file chosen</span>
-          <a id="gocharaDownload" href="https://vaiswanara.com/apps/" target="_blank" rel="noopener noreferrer" style="margin-left:12px; font-size:13px; color:var(--brand-2);">Click here to download Gochara Data files(json)</a>
+        <div class="control-group">
+          <span class="control-label">Janma Rashi</span>
+          <select id="janmaRashi" class="form-control">
+            <option value="">Select Rashi</option>
+            <option value="Mesha">Mesha (Aries)</option>
+            <option value="Vrushaba">Vrushaba (Taurus)</option>
+            <option value="Mithuna">Mithuna (Gemini)</option>
+            <option value="Karka">Karka (Cancer)</option>
+            <option value="Simha">Simha (Leo)</option>
+            <option value="Kanya">Kanya (Virgo)</option>
+            <option value="Tula">Tula (Libra)</option>
+            <option value="Vrischika">Vrischika (Scorpio)</option>
+            <option value="Dhanu">Dhanu (Sagittarius)</option>
+            <option value="Makara">Makara (Capricorn)</option>
+            <option value="Kumbha">Kumbha (Aquarius)</option>
+            <option value="Meena">Meena (Pisces)</option>
+          </select>
         </div>
+        <div class="control-group">
+          <span class="control-label">Language</span>
+          <select id="refLang" class="form-control">
+            <option value="english">English</option>
+            <option value="sanskrit">Sanskrit</option>
+            <option value="telugu">Telugu</option>
+            <option value="kannada">Kannada</option>
+          </select>
+        </div>
+        <div class="control-group" style="margin-left: auto;">
+          <button id="chooseFileBtn" class="btn btn-primary">📁 Upload JSON</button>
+          <input id="fileInput" type="file" accept="application/json" style="display:none;">
         </div>
       </div>
+      <div class="file-section">
+        <div class="file-info">
+          <span class="file-status" id="fileSummary">No file loaded</span>
+          <a id="gocharaDownload" href="https://vaiswanara.com/apps/" target="_blank" rel="noopener noreferrer" class="link-download">
+            ↓ Download Gochara Data
+          </a>
+        </div>
+        <a href="handout.html" target="_blank" rel="noopener noreferrer" class="link-about">ℹ About</a>
+      </div>
     </div>
-  </div>
 
-  <div class="container table-wrap">
-      <div class="panel table-panel">
-      <div class="toolbar">
-        <div><strong>Gochara Phala</strong></div>
-        <div class="right">
-          <span class="pill" id="activeDate">—</span>
-          <div style="margin-left:8px; font-size:13px; color:var(--muted);">Status: <span id="statusMsg">Ready</span></div>
+    <!-- Results Panel -->
+    <div class="results-panel">
+      <div class="results-header">
+        <span class="results-title">Gochara Phala</span>
+        <div class="results-meta">
+          <span class="date-pill" id="activeDate">—</span>
+          <span class="status-indicator" id="statusIndicator">
+            <span class="status-dot"></span>
+            <span id="statusMsg">Ready</span>
+          </span>
         </div>
-        </div>
-      <div>
-        <!-- Summary table: Date, Year, Weekday, Tithi, Nakshatra & Pada -->
-        <table class="detail-table" id="summaryTable" style="margin-bottom:12px;">
-          <tbody id="summaryBody"></tbody>
-        </table>
+      </div>
 
-        <table class="detail-table" id="detailTable">
+      <!-- Panchanga Summary -->
+      <div class="panchanga-card" id="panchangaCard" style="display: none;">
+        <div class="panchanga-label">Panchanga</div>
+        <div class="panchanga-content" id="panchangaContent">—</div>
+      </div>
+
+      <!-- Detail Table -->
+      <div class="table-container">
+        <table class="data-table" id="detailTable">
           <tbody id="detailBody"></tbody>
         </table>
-        <div class="empty" id="emptyState" style="display:none;">No data for selected date.</div>
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-state" id="emptyState">
+        <div class="empty-state-icon">☸</div>
+        <div class="empty-state-text">Select a date to view transit details</div>
       </div>
     </div>
   </div>
 
   <script>
+    // Generate starfield
+    function createStarfield() {
+      const container = document.getElementById('starfield');
+      const starCount = 50;
+      for (let i = 0; i < starCount; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        star.style.animationDelay = Math.random() * 3 + 's';
+        star.style.opacity = Math.random() * 0.5 + 0.2;
+        container.appendChild(star);
+      }
+    }
+    createStarfield();
+
+    // Constants
     const DEFAULT_JSON_PATH = "default.json";
     const TRANSIT_RULES_PATH = "planets-transit-results.json";
     const GOCHARA_TEXT_PATH = "Gochara_phala_All_languages.json";
@@ -308,7 +1037,9 @@
       filtered: [],
       byKeyOptions: {},
       loadedFrom: "auto",
-      fieldsOrder: []
+      fieldsOrder: [],
+      transitRules: [],
+      gocharaIndex: {}
     };
 
     const els = {
@@ -316,35 +1047,27 @@
       step: document.getElementById('stepSelect'),
       janma: document.getElementById('janmaRashi'),
       refLang: document.getElementById('refLang'),
-  file: document.getElementById('fileInput'),
-  chooseFileBtn: document.getElementById('chooseFileBtn'),
-  fileSummary: document.getElementById('fileSummary'),
+      file: document.getElementById('fileInput'),
+      chooseFileBtn: document.getElementById('chooseFileBtn'),
+      fileSummary: document.getElementById('fileSummary'),
       prev: document.getElementById('prevBtn'),
       next: document.getElementById('nextBtn'),
       status: document.getElementById('statusMsg'),
+      statusIndicator: document.getElementById('statusIndicator'),
       detailBody: document.getElementById('detailBody'),
       empty: document.getElementById('emptyState'),
       activeDate: document.getElementById('activeDate'),
-      
+      panchangaCard: document.getElementById('panchangaCard'),
+      panchangaContent: document.getElementById('panchangaContent')
     };
-
-    const detailTableEl = document.getElementById('detailTable');
-
-    function setTableMode(expanded) {
-      if (!detailTableEl) return;
-      if (expanded) {
-        detailTableEl.classList.add('expanded');
-      } else {
-        detailTableEl.classList.remove('expanded');
-      }
-      try { localStorage.setItem('transitTableExpanded', expanded ? '1' : '0'); } catch (e) {}
-    }
 
     function setStatus(text, type) {
       els.status.textContent = text;
-      if (type === 'error') els.status.style.color = 'var(--danger)';
-      else if (type === 'ok') els.status.style.color = 'var(--ok)';
-      else els.status.style.color = 'var(--muted)';
+      if (type === 'error') {
+        els.statusIndicator.classList.add('error');
+      } else {
+        els.statusIndicator.classList.remove('error');
+      }
     }
 
     function parseDateFlexible(d) {
@@ -353,8 +1076,8 @@
       if (/^\d{4}-\d{2}-\d{2}$/.test(d)) return new Date(d + 'T00:00:00');
       const m = d.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{2,4})$/);
       if (m) {
-        const dd = m[1].padStart(2,'0');
-        const mm = m[2].padStart(2,'0');
+        const dd = m[1].padStart(2, '0');
+        const mm = m[2].padStart(2, '0');
         let yyyy = m[3];
         if (yyyy.length === 2) yyyy = (yyyy > '50' ? '19' : '20') + yyyy;
         return new Date(`${yyyy}-${mm}-${dd}T00:00:00`);
@@ -366,26 +1089,22 @@
     function formatDateISO(d) {
       if (!d) return '';
       const yyyy = d.getFullYear();
-      const mm = String(d.getMonth()+1).padStart(2,'0');
-      const dd = String(d.getDate()).padStart(2,'0');
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
       return `${yyyy}-${mm}-${dd}`;
     }
 
     function formatDateDMY(d) {
       const dt = parseDateFlexible(d);
       if (!dt) return '';
-      const dd = String(dt.getDate()).padStart(2,'0');
-      const mm = String(dt.getMonth()+1).padStart(2,'0');
+      const dd = String(dt.getDate()).padStart(2, '0');
+      const mm = String(dt.getMonth() + 1).padStart(2, '0');
       const yyyy = dt.getFullYear();
       return `${dd}-${mm}-${yyyy}`;
     }
 
-    function uniq(values) {
-      return Array.from(new Set(values.filter(v => v != null && String(v).trim() !== ''))).sort((a,b)=>String(a).localeCompare(String(b)));
-    }
-
     function escapeHtml(s) {
-      return String(s).replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+      return String(s).replace(/[&<>"]/g, m => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[m]));
     }
 
     function normalizeLanguageKey(k) {
@@ -399,7 +1118,6 @@
     }
 
     function getFieldCI(obj, wantedKey) {
-      // Case-insensitive key fetch, tolerates BOM \uFEFF and surrounding spaces
       const target = String(wantedKey).toLowerCase();
       for (const k of Object.keys(obj || {})) {
         const norm = String(k).replace(/^\ufeff/, '').trim().toLowerCase();
@@ -421,7 +1139,6 @@
       const index = {};
       let arr = items;
       if (!Array.isArray(arr)) {
-        // Try common containers
         if (Array.isArray(items?.planets)) arr = items.planets;
         else if (Array.isArray(items?.records)) arr = items.records;
         else if (Array.isArray(items?.data)) arr = items.data;
@@ -441,11 +1158,19 @@
       return index;
     }
 
-    const RASHI_TO_INDEX = {'mesha':1,'vrushaba':2,'vrishabha':2,'mithuna':3,'karka':4,'karkataka':4,'simha':5,'kanya':6,'tula':7,'vrischika':8,'vrushchika':8,'scorpio':8,'dhanu':9,'sagittarius':9,'makara':10,'capricorn':10,'kumbha':11,'aquarius':11,'meena':12,'pisces':12};
-  const PLANET_KEYS = ['Surya','Chandra','Kuja','Budha','Guru','Sukra','Shani','Rahu','Ketu'];
-  // Year intentionally removed from summary display
-  const SUMMARY_KEYS = ['Date','Weekday','Tithi','Nakshatra & Pada'];
-    const PLANET_ALIAS_TO_RULE = {'Surya':'Surya','Chandra':'Chandra','Kuja':'Kuja','Budha':'Budha','Guru':'Guru','Sukra':'Sukra','Shani':'Shani','Rahu':'Rahu','Ketu':'Ketu'};
+    const RASHI_TO_INDEX = {
+      'mesha': 1, 'vrushaba': 2, 'vrishabha': 2, 'mithuna': 3, 'karka': 4, 'karkataka': 4,
+      'simha': 5, 'kanya': 6, 'tula': 7, 'vrischika': 8, 'vrushchika': 8, 'scorpio': 8,
+      'dhanu': 9, 'sagittarius': 9, 'makara': 10, 'capricorn': 10, 'kumbha': 11, 'aquarius': 11,
+      'meena': 12, 'pisces': 12
+    };
+
+    const PLANET_KEYS = ['Surya', 'Chandra', 'Kuja', 'Budha', 'Guru', 'Sukra', 'Shani', 'Rahu', 'Ketu'];
+    const SUMMARY_KEYS = ['Date', 'Weekday', 'Tithi', 'Nakshatra & Pada'];
+    const PLANET_ALIAS_TO_RULE = {
+      'Surya': 'Surya', 'Chandra': 'Chandra', 'Kuja': 'Kuja', 'Budha': 'Budha',
+      'Guru': 'Guru', 'Sukra': 'Sukra', 'Shani': 'Shani', 'Rahu': 'Rahu', 'Ketu': 'Ketu'
+    };
 
     function valueToRashiIndex(value) {
       if (value == null) return null;
@@ -462,7 +1187,11 @@
       }
       return null;
     }
-    function distanceHouse(fromIdx, toIdx) { if (!fromIdx || !toIdx) return null; return ((toIdx - fromIdx + 12) % 12) + 1; }
+
+    function distanceHouse(fromIdx, toIdx) {
+      if (!fromIdx || !toIdx) return null;
+      return ((toIdx - fromIdx + 12) % 12) + 1;
+    }
 
     function findIndexByDate(dateObj) {
       const iso = formatDateISO(dateObj);
@@ -472,166 +1201,175 @@
     function renderDetailForIndex(i) {
       if (i < 0 || i >= state.raw.length) {
         els.detailBody.innerHTML = '';
-        els.empty.style.display = 'block';
+        els.empty.style.display = 'flex';
+        els.panchangaCard.style.display = 'none';
         els.activeDate.textContent = '—';
         return;
       }
+
       const row = state.raw[i];
       els.empty.style.display = 'none';
       const dateStr = row.Date || formatDateISO(parseDateFlexible(row.Date));
-      els.activeDate.textContent = dateStr;
-      const frag = document.createDocumentFragment();
-      // Render single-line Panchanga summary (Date, Weekday, Tithi, Nakshatra & Pada)
-      const summaryBody = document.getElementById('summaryBody');
-      if (summaryBody) {
-        const dmy = formatDateDMY(row.Date || dateStr);
-        const wd = row['Weekday'] || '';
-        const tithi = row['Tithi'] || '';
-        const nakPada = row['Nakshatra & Pada'] || '';
-        const parts = [];
-        if (dmy) parts.push(dmy);
-        if (wd) parts.push(wd);
-        if (tithi) parts.push(tithi);
-        if (nakPada) parts.push(nakPada);
-        const panchanga = parts.length ? ('Panchanga: ' + parts.join(', ')) : '';
-        summaryBody.innerHTML = '<tr><td colspan="5" class="value">' + escapeHtml(panchanga) + '</td></tr>';
+      els.activeDate.textContent = formatDateDMY(dateStr);
+
+      // Update Panchanga
+      const dmy = formatDateDMY(row.Date || dateStr);
+      const wd = row['Weekday'] || '';
+      const tithi = row['Tithi'] || '';
+      const nakPada = row['Nakshatra & Pada'] || '';
+      const parts = [];
+      if (dmy) parts.push(dmy);
+      if (wd) parts.push(wd);
+      if (tithi) parts.push(tithi);
+      if (nakPada) parts.push(nakPada);
+      
+      if (parts.length) {
+        els.panchangaContent.textContent = parts.join(' • ');
+        els.panchangaCard.style.display = 'block';
       }
-  // Date is shown in the summary table; do not add a duplicate Date row here.
-      const janmaIdx = RASHI_TO_INDEX[(els.janma?.value||'').toLowerCase()] || null;
+
+      const frag = document.createDocumentFragment();
+      const janmaIdx = RASHI_TO_INDEX[(els.janma?.value || '').toLowerCase()] || null;
+      
       const order = (state.fieldsOrder && state.fieldsOrder.length ? state.fieldsOrder : Object.keys(row).filter(k => k !== 'Date'))
         .filter(k => !PLANET_KEYS.includes(k))
         .filter(k => !SUMMARY_KEYS.includes(k))
         .filter(k => k !== 'Nakshatra' && k !== 'Pada')
         .filter(k => k !== 'Year');
-      for (const key of order) {
-    const tr = document.createElement('tr');
-    const th = document.createElement('td'); th.className = 'label'; th.textContent = key;
-    const td = document.createElement('td'); td.className = 'value'; td.textContent = row[key] != null ? String(row[key]) : '';
-    const tddist = document.createElement('td'); tddist.className = 'distance'; tddist.textContent = '';
-    const tdres = document.createElement('td'); tdres.className = 'result'; tdres.textContent = '';
-    const tdref = document.createElement('td'); tdref.className = 'reference'; tdref.textContent = '';
-  tr.appendChild(th); tr.appendChild(td); tr.appendChild(tddist); tr.appendChild(tdres); tr.appendChild(tdref); frag.appendChild(tr);
+
+      // Create table header for non-planet data
+      if (order.length > 0) {
+        const headerRow = document.createElement('tr');
+        headerRow.innerHTML = `
+          <th>Attribute</th>
+          <th>Value</th>
+        `;
+        frag.appendChild(headerRow);
+
+        for (const key of order) {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td class="label-cell">${escapeHtml(key)}</td>
+            <td class="value-cell">${row[key] != null ? escapeHtml(String(row[key])) : '—'}</td>
+          `;
+          frag.appendChild(tr);
+        }
       }
 
-      // Planet transit section: only planet short names + result tag
-  const planetKeysPresent = PLANET_KEYS.filter(k => row.hasOwnProperty(k));
-  // Show planet transit section only when a Janma Rashi is selected
-  if (planetKeysPresent.length && (els.janma && els.janma.value)) {
-  // Compute map of planet -> transit house (Tr) for quick lookup
-  const planetTransitMap = {};
-  for (const key of planetKeysPresent) {
-    const planetValueTmp = row[key] != null ? row[key] : '';
-    const planetRashiTmp = valueToRashiIndex(planetValueTmp);
-    const distTmp = janmaIdx ? distanceHouse(janmaIdx, planetRashiTmp) : null;
-    if (distTmp != null) planetTransitMap[key] = distTmp;
-  }
+      // Planet transit section
+      const planetKeysPresent = PLANET_KEYS.filter(k => row.hasOwnProperty(k));
+      
+      if (planetKeysPresent.length && els.janma && els.janma.value) {
+        const planetTransitMap = {};
+        for (const key of planetKeysPresent) {
+          const planetValueTmp = row[key] != null ? row[key] : '';
+          const planetRashiTmp = valueToRashiIndex(planetValueTmp);
+          const distTmp = janmaIdx ? distanceHouse(janmaIdx, planetRashiTmp) : null;
+          if (distTmp != null) planetTransitMap[key] = distTmp;
+        }
 
-  // Header row for planet transit sub-table
-  const trHead = document.createElement('tr');
-  const thP = document.createElement('th'); thP.className = 'planet-name'; thP.textContent = 'Graha';
-  const thDist = document.createElement('th'); thDist.className = 'planet-dist'; thDist.textContent = 'Tr';
-  const thVeda = document.createElement('th'); thVeda.className = 'planet-veda'; thVeda.textContent = 'Veda';
-  const thVedaEffect = document.createElement('th'); thVedaEffect.className = 'planet-veda-effect'; thVedaEffect.textContent = 'Veda Effect';
-  const thRes = document.createElement('th'); thRes.className = 'planet-res'; thRes.textContent = 'Phala';
-  const thRef = document.createElement('th'); thRef.className = 'planet-ref'; thRef.textContent = 'Reference';
-  trHead.appendChild(thP); trHead.appendChild(thDist); trHead.appendChild(thVeda); trHead.appendChild(thVedaEffect); trHead.appendChild(thRes); trHead.appendChild(thRef); frag.appendChild(trHead);
+        // Add separator row
+        const sepRow = document.createElement('tr');
+        sepRow.innerHTML = `<td colspan="6" style="height: 20px; border: none;"></td>`;
+        frag.appendChild(sepRow);
+
+        // Planet table header
+        const planetHeader = document.createElement('tr');
+        planetHeader.innerHTML = `
+          <th>Graha</th>
+          <th>Tr</th>
+          <th>Veda</th>
+          <th>Veda Effect</th>
+          <th>Phala</th>
+          <th>Reference</th>
+        `;
+        frag.appendChild(planetHeader);
 
         for (const key of planetKeysPresent) {
           const tr = document.createElement('tr');
-          const th = document.createElement('td'); th.className = 'label planet-name'; th.textContent = key; // full planet name
           const planetValue = row[key] != null ? row[key] : '';
           const planetRashi = valueToRashiIndex(planetValue);
-          const tddist = document.createElement('td'); tddist.className = 'distance planet-dist';
-          const tdres = document.createElement('td'); tdres.className = 'result planet-res';
-          const tdveda = document.createElement('td'); tdveda.className = 'planet-veda';
-          const tdvedaEffect = document.createElement('td'); tdvedaEffect.className = 'planet-veda-effect';
           const dist = janmaIdx ? distanceHouse(janmaIdx, planetRashi) : null;
-          tddist.textContent = dist != null ? String(dist) : '';
+          
           const rulesName = PLANET_ALIAS_TO_RULE[key] || key;
           let resultTag = '';
           let matchedRule = null;
+          
           if (Array.isArray(state.transitRules)) {
-            matchedRule = state.transitRules.find(r => (r.name||'').toLowerCase() === (rulesName||'').toLowerCase());
+            matchedRule = state.transitRules.find(r => (r.name || '').toLowerCase() === (rulesName || '').toLowerCase());
             if (dist && matchedRule) {
-              if (Array.isArray(matchedRule.positiveTransit) && matchedRule.positiveTransit.includes(dist)) resultTag = 'Ausp<span class="tick green">✅</span>';
-              else if (Array.isArray(matchedRule.negativeTransit) && matchedRule.negativeTransit.includes(dist)) resultTag = 'In-Ausp<span class="tick red">❌</span>';
+              if (Array.isArray(matchedRule.positiveTransit) && matchedRule.positiveTransit.includes(dist)) {
+                resultTag = '<span class="phala-tag phala-auspicious">Auspicious<span class="tick">✓</span></span>';
+              } else if (Array.isArray(matchedRule.negativeTransit) && matchedRule.negativeTransit.includes(dist)) {
+                resultTag = '<span class="phala-tag phala-inauspicious">Inauspicious<span class="tick">✗</span></span>';
+              }
             }
           }
-          // Populate Veda column from matched rule if available. Use case-insensitive key fetch for veda mapping.
-          let vedaDisplay = '';
+
+          let vedaDisplay = '—';
           if (matchedRule) {
-            // rule.veda may be an object mapping transit numbers to values
             const vedaMap = getFieldCI(matchedRule, 'veda') || getAnyKeyIncludes(matchedRule, 'veda') || matchedRule.veda;
             try {
               if (vedaMap && typeof vedaMap === 'object') {
                 const mapped = vedaMap[String(dist)];
                 if (mapped != null && String(mapped).trim() !== '') vedaDisplay = String(mapped);
               }
-            } catch (e) { /* ignore */ }
+            } catch (e) { }
           }
-          tdveda.textContent = vedaDisplay || '—';
-          // Determine Veda Effect: check if any other planet's Tr equals this planet's Veda house
-          let vedaEffectText = '—';
+
+          let vedaEffectHtml = '—';
           try {
-            const vedaHouseNum = vedaDisplay ? Number(String(vedaDisplay)) : NaN;
+            const vedaHouseNum = vedaDisplay !== '—' ? Number(String(vedaDisplay)) : NaN;
             if (!Number.isNaN(vedaHouseNum)) {
               let foundNormal = false;
               let foundVipareeta = false;
               for (const [otherPlanet, otherTr] of Object.entries(planetTransitMap)) {
-                if (otherPlanet === key) continue; // ignore same planet
+                if (otherPlanet === key) continue;
                 if (Number(otherTr) === Number(vedaHouseNum)) {
-                  // Found an obstructing planet; check if that planet is in its own auspicious house
                   const otherRulesName = PLANET_ALIAS_TO_RULE[otherPlanet] || otherPlanet;
                   let otherRule = null;
                   if (Array.isArray(state.transitRules)) {
-                    otherRule = state.transitRules.find(r => (r.name||'').toLowerCase() === (otherRulesName||'').toLowerCase());
+                    otherRule = state.transitRules.find(r => (r.name || '').toLowerCase() === (otherRulesName || '').toLowerCase());
                   }
                   if (otherRule && Array.isArray(otherRule.positiveTransit) && otherRule.positiveTransit.map(Number).includes(Number(otherTr))) {
-                    foundVipareeta = true; break;
+                    foundVipareeta = true;
+                    break;
                   } else {
                     foundNormal = true;
                   }
                 }
               }
-              if (foundVipareeta) vedaEffectText = 'V-VEDA';
-              else if (foundNormal) vedaEffectText = 'VEDA';
+              if (foundVipareeta) {
+                vedaEffectHtml = '<span class="veda-effect positive">V-VEDA<span class="tick">✓</span></span>';
+              } else if (foundNormal) {
+                vedaEffectHtml = '<span class="veda-effect negative">VEDA<span class="tick">✗</span></span>';
+              }
             }
-          } catch (e) { /* ignore */ }
-          // Render short labels with colored tick marks
-          if (vedaEffectText === 'V-VEDA') {
-            tdvedaEffect.innerHTML = 'V-VEDA<span class="tick green">✅</span>';
-          } else if (vedaEffectText === 'VEDA') {
-            tdvedaEffect.innerHTML = 'VEDA<span class="tick red">❌</span>';
-          } else {
-            tdvedaEffect.textContent = '—';
-          }
-          // set simple phala text; apply class for color if needed
-          if (resultTag && resultTag.startsWith('Ausp')) {
-            tdres.innerHTML = resultTag;
-            tdres.classList.add('phala','ausp');
-            tdres.classList.remove('inausp');
-          } else if (resultTag && resultTag.startsWith('In-Ausp')) {
-            tdres.innerHTML = resultTag;
-            tdres.classList.add('phala','inausp');
-            tdres.classList.remove('ausp');
-          } else {
-            tdres.textContent = '';
-            tdres.classList.remove('phala','ausp','inausp');
-          }
-          const tdref = document.createElement('td'); tdref.className = 'reference planet-ref';
+          } catch (e) { }
+
+          let referenceText = '';
           if (dist != null && state.gocharaIndex) {
-            const rec = state.gocharaIndex[(key||'').toString().toLowerCase() + '|' + dist];
+            const rec = state.gocharaIndex[(key || '').toString().toLowerCase() + '|' + dist];
             if (rec) {
               const langKey = normalizeLanguageKey(els.refLang?.value || 'english');
-              // Try exact, uppercase, capitalized, and partial key matches
-              let text = getFieldCI(rec, langKey) || getFieldCI(rec, langKey.toUpperCase()) || getFieldCI(rec, langKey[0].toUpperCase()+langKey.slice(1));
+              let text = getFieldCI(rec, langKey) || getFieldCI(rec, langKey.toUpperCase()) || getFieldCI(rec, langKey[0].toUpperCase() + langKey.slice(1));
               if (!text) text = getAnyKeyIncludes(rec, langKey);
-              tdref.textContent = text || '';
+              referenceText = text || '';
             }
           }
-          tr.appendChild(th); tr.appendChild(tddist); tr.appendChild(tdveda); tr.appendChild(tdvedaEffect); tr.appendChild(tdres); tr.appendChild(tdref); frag.appendChild(tr);
+
+          tr.innerHTML = `
+            <td class="planet-name">${key}</td>
+            <td class="transit-num">${dist != null ? dist : '—'}</td>
+            <td class="veda-cell">${vedaDisplay}</td>
+            <td>${vedaEffectHtml}</td>
+            <td>${resultTag || '—'}</td>
+            <td class="reference-text">${escapeHtml(referenceText)}</td>
+          `;
+          frag.appendChild(tr);
         }
       }
+
       els.detailBody.innerHTML = '';
       els.detailBody.appendChild(frag);
     }
@@ -667,35 +1405,34 @@
     }
 
     async function loadData() {
-      setStatus('Loading data...', '');
+      setStatus('Loading...');
       let data = null;
-      // If a file is chosen, prefer that
+      
       if (els.file.files && els.file.files[0]) {
         try {
           data = await readLocalFile(els.file.files[0]);
           state.loadedFrom = 'file';
         } catch (e) {
           console.error(e);
-          setStatus('Failed reading local file', 'error');
+          setStatus('Failed reading file', 'error');
           return;
         }
       } else {
-        // Try auto fetch relative JSON
         try {
           const res = await fetch(DEFAULT_JSON_PATH, { cache: 'no-store' });
           if (!res.ok) throw new Error('HTTP ' + res.status);
           data = await res.json();
           state.loadedFrom = 'auto';
         } catch (e) {
-          console.warn('Auto fetch failed, prompt for file instead.', e);
-          setStatus('Could not auto-load JSON. Select a file above.', 'error');
+          console.warn('Auto fetch failed', e);
+          setStatus('Select a JSON file', 'error');
           state.raw = [];
           state.filtered = [];
           renderTable();
           return;
         }
       }
-      // Load transit rules
+
       try {
         const rr = await fetch(TRANSIT_RULES_PATH, { cache: 'no-store' });
         if (rr.ok) {
@@ -705,7 +1442,7 @@
           state.transitRules = [];
         }
       } catch (e) { state.transitRules = []; }
-      // Load gochara reference texts
+
       try {
         const gt = await fetch(GOCHARA_TEXT_PATH, { cache: 'no-store' });
         if (gt.ok) {
@@ -715,37 +1452,39 @@
           state.gocharaIndex = {};
         }
       } catch (e) { state.gocharaIndex = {}; }
+
       if (!Array.isArray(data)) {
-        setStatus('JSON should be an array of objects', 'error');
+        setStatus('JSON should be an array', 'error');
         return;
       }
-      // Normalize and compute derived fields
+
       state.raw = data.map(r => {
         const row = { ...r };
         const nak = r.Nakshatra != null ? String(r.Nakshatra) : '';
         const pada = r.Pada != null ? String(r.Pada) : '';
-        const combined = (nak || pada) ? `${nak}${nak&&pada?'-':''}${pada}` : '';
-        if (!row['Nakshatra & Pada'] || row['Nakshatra & Pada'] === '' ) {
+        const combined = (nak || pada) ? `${nak}${nak && pada ? '-' : ''}${pada}` : '';
+        if (!row['Nakshatra & Pada'] || row['Nakshatra & Pada'] === '') {
           row['Nakshatra & Pada'] = combined;
         }
         return row;
       });
-      // Determine fields order dynamically from first row
+
       const firstRow = state.raw.find(r => r && typeof r === 'object') || {};
       state.fieldsOrder = Object.keys(firstRow).filter(k => k !== 'Date');
 
-      // Sort by date
-      state.raw.sort((a,b)=>{
-        const da = parseDateFlexible(a.Date); const db = parseDateFlexible(b.Date);
-        return (da-db);
+      state.raw.sort((a, b) => {
+        const da = parseDateFlexible(a.Date);
+        const db = parseDateFlexible(b.Date);
+        return (da - db);
       });
-      // Initialize date input to first date or keep existing
+
       if (!els.date.value && state.raw.length) {
         const first = parseDateFlexible(state.raw[0].Date);
         els.date.value = formatDateISO(first);
       }
+      
       onDateChange();
-      // Update file summary with filename and loaded rows
+      
       try {
         const count = state.raw.length;
         let name = '';
@@ -755,20 +1494,30 @@
           name = DEFAULT_JSON_PATH;
         }
         if (els.fileSummary) {
-          // show full name in summary and keep status tooltip on the element
-          els.fileSummary.textContent = (name || 'No file') + ' — ' + count + ' records';
-          els.fileSummary.title = name + ' — Loaded ' + count + ' rows';
+          els.fileSummary.innerHTML = `<span class="file-name">${name}</span> — <span class="file-count">${count} records</span>`;
+          els.fileSummary.classList.add('loaded');
+          els.fileSummary.title = `${name} — Loaded ${count} rows`;
         }
-      } catch (e) { /* ignore */ }
-      // Keep main status for transient messages; mark ready
-      setStatus('Ready', 'ok');
+      } catch (e) { }
+      
+      setStatus('Ready');
     }
 
     function onDateChange() {
       const d = parseDateFlexible(els.date.value);
-      if (!d) { els.activeDate.textContent = '—'; els.detailBody.innerHTML=''; els.empty.style.display='block'; return; }
+      if (!d) {
+        els.activeDate.textContent = '—';
+        els.detailBody.innerHTML = '';
+        els.empty.style.display = 'flex';
+        els.panchangaCard.style.display = 'none';
+        return;
+      }
       const idx = findIndexByDate(d);
       renderDetailForIndex(idx);
+    }
+
+    function renderTable() {
+      onDateChange();
     }
 
     function attachEvents() {
@@ -776,32 +1525,24 @@
         els.chooseFileBtn.addEventListener('click', (e) => { e.preventDefault(); els.file.click(); });
       }
       if (els.file) {
-        els.file.addEventListener('change', () => {
-          loadData();
-        });
+        els.file.addEventListener('change', () => { loadData(); });
       }
       els.date.addEventListener('change', onDateChange);
       if (els.janma) els.janma.addEventListener('change', onDateChange);
       if (els.refLang) els.refLang.addEventListener('change', onDateChange);
-      els.prev.addEventListener('click', (e)=>{ e.preventDefault(); stepDateSigned(-1); });
-      els.next.addEventListener('click', (e)=>{ e.preventDefault(); stepDateSigned(1); });
-      // compact toggle removed
+      els.prev.addEventListener('click', (e) => { e.preventDefault(); stepDateSigned(-1); });
+      els.next.addEventListener('click', (e) => { e.preventDefault(); stepDateSigned(1); });
     }
 
     // Init
-    (function init(){
+    (function init() {
       attachEvents();
-      // Set sensible defaults: current date and Janma Rashi = Mesha
       try {
         if (!els.date.value) els.date.value = formatDateISO(new Date());
-        // Keep Janma Rashi default as 'Select' (empty) so planet table is hidden until user chooses
         if (els.janma) els.janma.value = '';
-      } catch (e) {}
-      // Attempt to pre-load data (may fail on file://); user can select file
+      } catch (e) { }
       loadData();
     })();
   </script>
 </body>
 </html>
-
-
